@@ -20,14 +20,29 @@ SYSROOT_DIRS:append = " /telaf"
 
 INSANE_SKIP:${PN} += "already-stripped"
 
+do_compile:prepend() {
+    # Clean up old build directory if it exists
+    if [ -d "${S}/build" ]; then
+        rm -rf "${S}/build"
+    fi
+}
+
 do_install() {
+    cmake --install "${B}" --prefix "${S}/build/staging"
     set -eu
     install -d "${D}/telaf/target-pa/lib"
 
-    if ls "${B}"/*.so* >/dev/null 2>&1; then
-        cp -a --no-preserve=ownership "${B}"/*.so* "${D}/telaf/target-pa/lib/"
+    if ls "${S}/build/staging/lib/"*.so* >/dev/null 2>&1; then
+        cp -a --no-preserve=ownership "${S}/build/staging/lib/"*.so* "${D}/telaf/target-pa/lib/"
     else
-        bbwarn "No shared libraries (*.so*) produced in ${B}"
+        bbwarn "No shared libraries (*.so*) produced in ${S}/build/staging/lib"
+    fi
+
+    if [ -d "${S}/build/staging/.build-id" ]; then
+        install -d "${D}/telaf/target-pa/.build-id"
+        cp -a --no-preserve=ownership "${S}/build/staging/.build-id/." "${D}/telaf/target-pa/.build-id/"
+    else
+        bbwarn "No .build-id directory found in ${S}/build/staging"
     fi
 }
 
