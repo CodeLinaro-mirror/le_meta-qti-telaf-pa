@@ -16,6 +16,9 @@ S = "${WORKDIR}/telaf-pa"
 # do not pack the libraries to rootfs
 PACKAGES = ""
 
+# No packages created, so disable build history task
+BUILDHISTORY_FEATURES:remove = "package"
+
 SYSROOT_DIRS:append = " /telaf"
 
 INSANE_SKIP:${PN} += "already-stripped"
